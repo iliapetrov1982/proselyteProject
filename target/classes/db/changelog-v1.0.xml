@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+    <changeSet id="1.0.0" author="ilia-p">
+        <createTable tableName="sonderlieferungen">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+
+            <column name="order" type="VARCHAR(255)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+
+            <column name="logistic_aggregator" type="VARCHAR(255)">
+                <constraints nullable="true"/>
+            </column>
+
+            <column name="logistic_operator" type="VARCHAR(255)">
+                <constraints nullable="true"/>
+            </column>
+
+            <column name="delivery_order_nmb" type="VARCHAR(255)">
+                <constraints nullable="true"/>
+            </column>
+
+            <column name="gross_price" type="DECIMAL">
+                <constraints nullable="true"/>
+            </column>
+
+            <column name="net_price" type="DECIMAL">
+                <constraints nullable="true"/>
+            </column>
+
+            <column name="reason" type="VARCHAR(1024)">
+                <constraints nullable="true"/>
+            </column>
+
+            <column name="date_of_booking" type="DATE">
+                <constraints nullable="true"/>
+            </column>
+
+            <column name="status" type="VARCHAR(255)">
+                <constraints nullable="true"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet author="ilia-p" id="1.0.1">
+        <renameColumn columnDataType="VARCHAR(255)"
+                      newColumnName="order_number"
+                      oldColumnName="order"
+                      remarks="was a reserved word"
+                      schemaName="sonderlieferungen"
+                      tableName="sonderlieferungen"/>
+    </changeSet>
+
+    <changeSet id="1.0.2" author="ilia-p">
+        <modifyDataType tableName="sonderlieferungen" columnName="gross_price" newDataType="DOUBLE"/>
+        <modifyDataType tableName="sonderlieferungen" columnName="net_price" newDataType="DOUBLE"/>
+    </changeSet>
+
+
+<!--    <changeSet id="2" author="ilia">-->
+<!--        <dropColumn-->
+<!--                tableName="persons">-->
+<!--            <column name = "address"/>-->
+<!--        </dropColumn>-->
+<!--    </changeSet>-->
+
+<!--    <changeSet id="3" author="ilia">-->
+<!--        <addColumn-->
+<!--                tableName="persons">-->
+<!--            <column name = "address" type="varchar(255)"/>-->
+<!--        </addColumn>-->
+<!--    </changeSet>-->
+
+</databaseChangeLog>
