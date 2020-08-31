@@ -8,9 +8,10 @@ import java.util.List;
  *
  */
 
-public interface CustomerService {
+public interface LogisticsService {
     Logistics getById(Long id);
     void save(List<Logistics> dispatches);
     void delete (Long id);
     List<Logistics> getAll();
+    List<Logistics> syncUp();
 }

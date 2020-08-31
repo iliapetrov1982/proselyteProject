@@ -1,14 +1,14 @@
-package com.xometry.sonderlieferungen.initialdata;
+package com.xometry.sonderlieferungen.service;
 
 
 import com.monitorjbl.xlsx.StreamingReader;
 import com.xometry.sonderlieferungen.model.Logistics;
+import com.xometry.sonderlieferungen.repository.LogisticsRepository;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -20,57 +20,85 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-@Component
-public class Data {
+@Service
+public class LogisticsServiceImplementation implements LogisticsService {
+    final LogisticsRepository logisticsRepository;
 
-    public Data() {
+    public LogisticsServiceImplementation(LogisticsRepository logisticsRepository) {
+        this.logisticsRepository = logisticsRepository;
     }
 
-    public List<Logistics> getDataFromFile() {
+    @Override
+    public Logistics getById(Long id) {
+        return logisticsRepository.getOne(id);
+    }
+
+    @Override
+    public void save(List<Logistics> dispatches) {
+        logisticsRepository.saveAll(dispatches);
+    }
+
+    @Override
+    public void delete(Long id) {
+        logisticsRepository.deleteById(id);
+    }
+
+    @Override
+    public List<Logistics> getAll() {
+        return logisticsRepository.findAll();
+    }
+
+    @Override
+    public List<Logistics> syncUp() {
+        List<Logistics> logistics = getDataFromFile();
+        return this.logisticsRepository.saveAll(logistics);
+    }
+
+    private List<Logistics> getDataFromFile() {
         List<Logistics> logistics = new ArrayList<>();
-        Workbook wb = null;           //initialize Workbook null
+        Workbook wb;
         try {
             InputStream fis = new FileInputStream(new File("src/main/resources/data/Sonderlieferungen.xlsx"));
             wb = StreamingReader.builder().rowCacheSize(100).bufferSize(4096).open(fis);
             Sheet sheet = wb.getSheetAt(0);   //getting the XSSFSheet object at given index
-            for (Row r: sheet) {
+            for (Row r : sheet) {
                 int j = -1;
                 Logistics dispatch = new Logistics();
-                for (Cell cell: r) {
+                for (Cell cell : r) {
                     j++;
                     switch (j) {
                         case 0:
-                            try{
+                            try {
                                 dispatch.setOrder(cell.getStringCellValue());
                             } catch (IllegalStateException e) {
-                                dispatch.setOrder( String.valueOf(cell.getNumericCellValue()));
+                                dispatch.setOrder(String.valueOf(cell.getNumericCellValue()));
                             }
                             break;
                         case 1:
-                            dispatch.setLogistic_aggregator(cell.getStringCellValue());
+                            dispatch.setLogisticAggregator(cell.getStringCellValue());
                             break;
                         case 2:
-                            dispatch.setLogistic_operator(cell.getStringCellValue());
+                            dispatch.setLogisticOperator(cell.getStringCellValue());
                             break;
                         case 3:
-                            try{
-                                dispatch.setDelivery_order_nmb(cell.getStringCellValue());
+                            try {
+                                dispatch.setDeliveryOrderNmb(cell.getStringCellValue());
                             } catch (IllegalStateException e) {
-                                dispatch.setDelivery_order_nmb(String.valueOf(cell.getNumericCellValue()));
+                                dispatch.setDeliveryOrderNmb(String.valueOf(cell.getNumericCellValue()));
                             }
                             break;
                         case 4:
                             try {
-                                dispatch.setGross_price((double) cell.getNumericCellValue());
+                                dispatch.setGrossPrice((double) cell.getNumericCellValue());
                             } catch (IllegalStateException e) {
-                                dispatch.setGross_price(0.0);
+                                dispatch.setGrossPrice(0.0);
                             }
                             break;
                         case 5:
                             try {
-                                dispatch.setNet_price(cell.getNumericCellValue());
+                                dispatch.setNetPrice(cell.getNumericCellValue());
                             } catch (IllegalStateException e) {
-                                dispatch.setNet_price(0.0);
+                                dispatch.setNetPrice(0.0);
                             }
                             break;
                         case 6:
@@ -79,10 +107,9 @@ public class Data {
                         case 7:
                             try {
                                 String dateFormatted = convertDate(cell.getDateCellValue());
-//                                System.out.println(dateFormatted);
-                                dispatch.setDate_of_booking(dateFormatted);
+                                dispatch.setDateOfBooking(dateFormatted);
                             } catch (IllegalStateException e) {
-                                dispatch.setDate_of_booking("1970-01-01");
+                                dispatch.setDateOfBooking("1970-01-01");
                             }
                             break;
                         case 8:
@@ -99,7 +126,7 @@ public class Data {
         return logistics;
     }
 
-    public String convertDate(Date date) {
+    private String convertDate(Date date) {
         if (date != null) {
             DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
             return formatter.format(date);
